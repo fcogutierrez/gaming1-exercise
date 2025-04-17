@@ -1,6 +1,6 @@
 ﻿namespace Domain.Model.ValueObjects;
 
-internal sealed record MisteryNumberRange
+internal sealed class MisteryNumberRange
 {
     public int Min { get; }
     public int Max { get; }

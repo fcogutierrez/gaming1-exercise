@@ -9,6 +9,7 @@ internal sealed class GameAggregate : AggregateBase
 {
     private MisteryNumber _misteryNumber = null!;
     private IEnumerable<Player> _players = [];
+    private int? _winnerId = null;
 
     public GameAggregate(int min, int max, IEnumerable<string> playerNames) : base()
     {
@@ -19,7 +20,7 @@ internal sealed class GameAggregate : AggregateBase
 
         var range = MisteryNumberRange.Create(min, max);
         var misteryNumber = MisteryNumber.Generate(range);
-        var players = playerNames.Select((name, index) => new Player(index, name));
+        var players = playerNames.Select((name, index) => Player.Create(index, name));
 
         var @event = new GameCreatedEvent(Guid.NewGuid(), misteryNumber, players);
         Apply(@event);
@@ -30,7 +31,7 @@ internal sealed class GameAggregate : AggregateBase
         var player = _players.SingleOrDefault(p => p.Id == playerId);
         if (player is null)
         {
-            throw new ArgumentException($"Player with ID {playerId} not found", nameof(playerId));
+            throw new ArgumentException($"Player with ID {playerId} was not found", nameof(playerId));
         }
 
         if (guess < _misteryNumber.Value)
@@ -63,5 +64,8 @@ internal sealed class GameAggregate : AggregateBase
 
     private void Apply(GuessTooLowEvent @event) { }
 
-    private void Apply(GuessCorrectEvent @event) { }
+    private void Apply(GuessCorrectEvent @event)
+    {
+        _winnerId = @event.PlayerId;
+    }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Domain.Model.ValueObjects;
 
-internal sealed record MisteryNumber
+internal sealed class MisteryNumber
 {
     public int Value { get; }
 
