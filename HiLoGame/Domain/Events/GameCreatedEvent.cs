@@ -4,4 +4,4 @@ using Domain.Model.ValueObjects;
 
 namespace Domain.Events;
 
-internal sealed record GameCreatedEvent(Guid Id, MisteryNumber MisteryNumber) : IDomainEvent;
+internal sealed record GameCreatedEvent(Guid AggregateId, MisteryNumber MisteryNumber) : IDomainEvent;

@@ -3,4 +3,4 @@ using Domain.Model.Entities;
 
 namespace Domain.Events;
 
-internal sealed record PlayersCreatedEvent(Guid Id, List<Player> Players) : IDomainEvent;
+internal sealed record PlayersCreatedEvent(Guid AggregateId, List<Player> Players) : IDomainEvent;

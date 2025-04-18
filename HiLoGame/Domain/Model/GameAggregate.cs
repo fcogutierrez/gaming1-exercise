@@ -7,7 +7,7 @@ using Domain.Model.ValueObjects;
 
 namespace Domain.Model;
 
-internal sealed class GameAggregate : AggregateBase
+public sealed class GameAggregate : AggregateBase
 {
     private int _round = 1;
     private MisteryNumber _misteryNumber = null!;
@@ -22,7 +22,7 @@ internal sealed class GameAggregate : AggregateBase
         var misteryNumber = MisteryNumber.Generate(range, randomProvider);
 
         var @event = new GameCreatedEvent(Guid.NewGuid(), misteryNumber);
-        Apply(@event);
+        ApplyDomainEvent(@event);
     }
 
     public CreatePlayersResult CreatePlayers(IEnumerable<string> playerNames)
@@ -33,12 +33,12 @@ internal sealed class GameAggregate : AggregateBase
         }
 
         var players = playerNames.Select((name, index) => Player.Create(Guid.NewGuid(), index + 1, name)).ToList();
-        Apply(new PlayersCreatedEvent(Id, players));
+        ApplyDomainEvent(new PlayersCreatedEvent(Id, players));
 
-        Apply(new NewRoundStartedEvent(Id, _round));
+        ApplyDomainEvent(new NewRoundStartedEvent(Id, _round));
 
         var nextPlayer = GetNewNextPlayer();
-        Apply(new NewPlayerTurnEvent(Id, nextPlayer.Id, _round));
+        ApplyDomainEvent(new NewPlayerTurnEvent(Id, nextPlayer.Id, _round));
 
         return new CreatePlayersResult(nextPlayer.Id, nextPlayer.Order, nextPlayer.Name, _round);
     }
@@ -66,13 +66,13 @@ internal sealed class GameAggregate : AggregateBase
         switch (guessAttempt.Status)
         {
             case PlayerGuessStatus.TooLow:
-                Apply(new GuessTooLowEvent(Id, playerId, guessAttempt));
+                ApplyDomainEvent(new GuessTooLowEvent(Id, playerId, guessAttempt));
                 break;
             case PlayerGuessStatus.TooHigh:
-                Apply(new GuessTooHighEvent(Id, playerId, guessAttempt));
+                ApplyDomainEvent(new GuessTooHighEvent(Id, playerId, guessAttempt));
                 break;
             case PlayerGuessStatus.Correct:
-                Apply(new GuessCorrectEvent(Id, playerId, guessAttempt));
+                ApplyDomainEvent(new GuessCorrectEvent(Id, playerId, guessAttempt));
                 break;
             default:
                 throw new InvalidOperationException("Invalid guess attempt status");
@@ -81,11 +81,22 @@ internal sealed class GameAggregate : AggregateBase
         if (IsNextPlayerTheLastInRound())
         {
             int newRound = _round + 1;
-            Apply(new NewRoundStartedEvent(Id, newRound));
+            ApplyDomainEvent(new NewRoundStartedEvent(Id, newRound));
         }
 
         var newNextPlayer = GetNewNextPlayer();
-        Apply(new NewPlayerTurnEvent(Id, newNextPlayer.Id, _round));
+        ApplyDomainEvent(new NewPlayerTurnEvent(Id, newNextPlayer.Id, _round));
+    }
+
+    protected override void RegisterDomainEventAppliers()
+    {
+        RegisterDomainEventApplier<GameCreatedEvent>(Apply);
+        RegisterDomainEventApplier<PlayersCreatedEvent>(Apply);
+        RegisterDomainEventApplier<NewRoundStartedEvent>(Apply);
+        RegisterDomainEventApplier<NewPlayerTurnEvent>(Apply);
+        RegisterDomainEventApplier<GuessTooHighEvent>(Apply);
+        RegisterDomainEventApplier<GuessTooLowEvent>(Apply);
+        RegisterDomainEventApplier<GuessCorrectEvent>(Apply);
     }
 
     private bool IsNextPlayerTheLastInRound() => _nextPlayer.Order == _maxOrder;
@@ -103,7 +114,7 @@ internal sealed class GameAggregate : AggregateBase
 
     private void Apply(GameCreatedEvent @event)
     {
-        Id = @event.Id;
+        Id = @event.AggregateId;
         _misteryNumber = @event.MisteryNumber;
 
         Save(@event);
@@ -157,4 +168,4 @@ internal sealed class GameAggregate : AggregateBase
     }
 }
 
-internal sealed record CreatePlayersResult(Guid NextPlayerId, int NextPlayerOrder, string NextPlayerNam, int CurrentRound);
+public sealed record CreatePlayersResult(Guid NextPlayerId, int NextPlayerOrder, string NextPlayerNam, int CurrentRound);

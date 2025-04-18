@@ -2,5 +2,5 @@
 
 public interface IDomainEvent
 {
-    public Guid Id { get; }
+    public Guid AggregateId { get; }
 }

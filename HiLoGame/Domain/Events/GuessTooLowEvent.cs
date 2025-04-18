@@ -3,4 +3,4 @@ using Domain.Model.ValueObjects;
 
 namespace Domain.Events;
 
-internal sealed record GuessTooLowEvent(Guid Id, Guid PlayerId, GuessAttempt GuessAttempt) : IGuessEvent;   
+internal sealed record GuessTooLowEvent(Guid AggregateId, Guid PlayerId, GuessAttempt GuessAttempt) : IGuessEvent;   

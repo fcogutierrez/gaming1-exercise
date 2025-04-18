@@ -3,4 +3,4 @@ using Domain.Model.ValueObjects;
 
 namespace Domain.Events;
 
-internal sealed record GuessCorrectEvent(Guid Id, Guid PlayerId, GuessAttempt GuessAttempt) : IGuessEvent;
+internal sealed record GuessCorrectEvent(Guid AggregateId, Guid PlayerId, GuessAttempt GuessAttempt) : IGuessEvent;
