@@ -53,7 +53,7 @@ namespace Domain.Tests.Model
         }
 
         [Fact]
-        public void Add_players_adds_players_and_starts_the_round()
+        public void Add_players_adds_players_and_starts_the_first_turn_in_the_first_round()
         {
             // Arrange
             var game = new GameAggregate(1, 100, Mock.Of<IRandomProvider>());
@@ -64,7 +64,7 @@ namespace Domain.Tests.Model
             };
 
             // Act
-            var result = game.AddPlayers(playerNames);
+            var initialTurnResult = game.AddPlayers(playerNames);
 
             // Assert
             game.Changes.Count().ShouldBe(4);
@@ -94,10 +94,10 @@ namespace Domain.Tests.Model
             newPlayerTurnEvent.PlayerId.ShouldBe(playerOne.Id);
             newPlayerTurnEvent.Round.ShouldBe(1);
 
-            result.CurrentRound.ShouldBe(1);
-            result.PlayerTurn.Id.ShouldNotBe(playerOne.Id);
-            result.PlayerTurn.Name.ShouldBe("Player1");
-            result.PlayerTurn.Order.ShouldBe(1);
+            initialTurnResult.CurrentRound.ShouldBe(1);
+            initialTurnResult.PlayerTurn.Id.ShouldBe(playerOne.Id);
+            initialTurnResult.PlayerTurn.Name.ShouldBe("Player1");
+            initialTurnResult.PlayerTurn.Order.ShouldBe(1);
         }
 
         [Fact]
@@ -190,7 +190,7 @@ namespace Domain.Tests.Model
             var guessTooHighEvent = game.Changes.ElementAt(4).ShouldBeOfType<GuessTooHighEvent>();
             guessTooHighEvent.AggregateId.ShouldBe(game.Id);
             guessTooHighEvent.PlayerId.ShouldBe(playerOneId);
-            guessTooHighEvent.GuessAttempt.Guess.ShouldBe(99);
+            guessTooHighEvent.GuessAttempt.Guess.ShouldBe(83);
             guessTooHighEvent.GuessAttempt.Status.ShouldBe(PlayerGuessStatus.TooHigh);
 
             var newPlayerTurnEvent = game.Changes.ElementAt(5).ShouldBeOfType<NewPlayerTurnEvent>();
