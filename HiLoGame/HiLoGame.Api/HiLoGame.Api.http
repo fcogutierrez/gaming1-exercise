@@ -1,6 +1,11 @@
 @HiLoGame.Api_HostAddress = http://localhost:32768
 
-GET {{HiLoGame.Api_HostAddress}}/games/hilo/
-Accept: application/json
+POST {{HiLoGame.Api_HostAddress}}/games/hilo/
+Content-Type: application/json
+
+{
+  "min": 1,
+  "max": 100
+}
 
 ###
