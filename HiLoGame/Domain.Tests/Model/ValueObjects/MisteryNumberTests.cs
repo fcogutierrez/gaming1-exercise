@@ -3,7 +3,7 @@ using Domain.Model.ValueObjects;
 using Moq;
 using Shouldly;
 
-namespace Domain.Tests.Model;
+namespace Domain.Tests.Model.ValueObjects;
 
 public sealed class MisteryNumberTests
 {

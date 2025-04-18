@@ -5,7 +5,7 @@ using Domain.Model.ValueObjects;
 using Moq;
 using Shouldly;
 
-namespace Domain.Tests.Entities;
+namespace Domain.Tests.Model.Entities;
 
 public sealed class PlayerTests
 {

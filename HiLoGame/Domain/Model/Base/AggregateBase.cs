@@ -26,12 +26,6 @@ public abstract class AggregateBase
         }
     }
 
-    public void Save(IDomainEvent @event)
-    {
-        _changes.Add(@event);
-        Version++;
-    }
-
     protected abstract void RegisterDomainEventAppliers();
 
     protected void ApplyDomainEvent(IDomainEvent domainEvent)
@@ -39,12 +33,18 @@ public abstract class AggregateBase
         var applier = _domainEventAppliersRegistry.FindApplier(domainEvent);
         applier(domainEvent);
 
-        _changes.Add(domainEvent);
+        Save(domainEvent);
     }
 
     protected void RegisterDomainEventApplier<TDomainEvent>(Action<TDomainEvent> applier)
         where TDomainEvent : IDomainEvent
     {
         _domainEventAppliersRegistry.Register(applier);
+    }
+
+    private void Save(IDomainEvent @event)
+    {
+        _changes.Add(@event);
+        Version++;
     }
 }

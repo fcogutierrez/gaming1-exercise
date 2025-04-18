@@ -124,7 +124,7 @@ public sealed class GameAggregate : AggregateBase
     {
         if (_nextPlayer is null)
         {
-            throw new InvalidOperationException("Next player index is not set");
+            return _players.First();
         }
 
         var nextPlayerIndex = (_nextPlayer.Order + 1) % _players.Count;
@@ -145,46 +145,34 @@ public sealed class GameAggregate : AggregateBase
     {
         Id = @event.AggregateId;
         _misteryNumber = @event.MisteryNumber;
-
-        Save(@event);
     }
 
     private void Apply(PlayersAddedEvent @event)
     {
         _players = @event.Players;
         _maxOrder = _players.Max(p => p.Order);
-
-        Save(@event);
     }
 
     private void Apply(NewRoundStartedEvent @event)
     {
         _round = @event.Round;
-
-        Save(@event);
     }
 
     private void Apply(NewPlayerTurnEvent @event)
     {
         _nextPlayer = _players.Single(p => p.Id == @event.PlayerId);
-
-        Save(@event);
     }
 
     private void Apply(GuessTooHighEvent @event)
     {
         var player = _players.Single(p => p.Id == @event.PlayerId);
         player.AddGuessAttempt(@event.GuessAttempt);
-
-        Save(@event);
     }
 
     private void Apply(GuessTooLowEvent @event)
     {
         var player = _players.Single(p => p.Id == @event.PlayerId);
         player.AddGuessAttempt(@event.GuessAttempt);
-
-        Save(@event);
     }
 
     private void Apply(GuessCorrectEvent @event)
@@ -192,8 +180,6 @@ public sealed class GameAggregate : AggregateBase
         _winnerId = @event.PlayerId;
         var player = _players.Single(p => p.Id == @event.PlayerId);
         player.AddGuessAttempt(@event.GuessAttempt);
-
-        Save(@event);
     }
 }
 

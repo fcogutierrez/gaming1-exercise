@@ -1,6 +1,6 @@
 ﻿using Domain.Model.ValueObjects;
 
-namespace Domain.Tests.Model;
+namespace Domain.Tests.Model.ValueObjects;
 
 public sealed class MisteryNumberRangeTests
 {
