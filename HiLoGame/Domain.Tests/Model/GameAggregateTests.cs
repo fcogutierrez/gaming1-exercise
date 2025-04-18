@@ -37,6 +37,8 @@ namespace Domain.Tests.Model
             gameCreated.MisteryNumber.Value.ShouldBe(MisteryNumber);
             gameCreated.MisteryNumber.Range.Min.ShouldBe(min);
             gameCreated.MisteryNumber.Range.Max.ShouldBe(max);
+
+            _randomProviderMock.Verify(m => m.GetRandomNumber(min, max), Times.Once);
         }
 
         [Fact]
@@ -91,5 +93,48 @@ namespace Domain.Tests.Model
             newPlayerTurnEvent.PlayerId.ShouldBe(firstPlayer.Id);
             newPlayerTurnEvent.Round.ShouldBe(1);
         }
+
+        [Fact]
+        public void Guess_mistery_number_throws_an_exception_when_player_is_not_found()
+        {
+            // Arrange
+            var game = new GameAggregate(1, 100, Mock.Of<IRandomProvider>());
+            var playerNames = new[] { "Player1", "Player2" };
+            game.AddPlayers(playerNames);
+
+            // Act & Assert
+            Assert.Throws<ArgumentException>(() => game.GuessMisteryNumber(Guid.NewGuid(), 50));
+        }
+
+        [Fact]
+        public void Guess_mistery_number_throws_an_exception_when_it_is_not_player_turn()
+        {
+            // Arrange
+            var game = new GameAggregate(1, 100, Mock.Of<IRandomProvider>());
+            var playerNames = new[] { "Player1", "Player2" };
+            game.AddPlayers(playerNames);
+
+            var playersAddedEvent = game.Changes.ElementAt(1).ShouldBeOfType<PlayersAddedEvent>();
+            var secondPlayerId = playersAddedEvent.Players[1].Id;
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => game.GuessMisteryNumber(secondPlayerId, 50));
+        }
+
+        //[Fact]
+        //public void Guess_mistery_number_throws_an_exception_when_game_is_finished()
+        //{
+        //    // Arrange
+        //    var game = new GameAggregate(1, 100, _randomProviderMock.Object);
+        //    var playerNames = new[]
+        //    {
+        //        "Player1",
+        //        "Player2"
+        //    };
+        //    var addPlayersResult = game.AddPlayers(playerNames);
+
+        //    // Act & Assert
+        //    Assert.Throws<InvalidOperationException>(() => game.GuessMisteryNumber(Guid.NewGuid(), 50));
+        //}
     }
 }
