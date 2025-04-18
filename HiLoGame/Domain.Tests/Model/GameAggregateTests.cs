@@ -163,7 +163,43 @@ namespace Domain.Tests.Model
             newPlayerTurnEvent.Round.ShouldBe(1);
         }
 
-        private Guid GetPlayerId(GameAggregate game, int index)
+        [Fact]
+        public void Guess_mistery_number_returns_next_turn_result_when_guess_from_first_player_is_too_high()
+        {
+            // Arrange
+            var game = new GameAggregate(1, 100, _randomProviderMock.Object);
+            var playerNames = new[] { "Player1", "Player2" };
+            var initialTurnResult = game.AddPlayers(playerNames);
+
+            // Act
+            var result = game.GuessMisteryNumber(initialTurnResult.PlayerTurn.Id, 83);
+
+            // Assert
+            var playerOneId = GetPlayerId(game, 0);
+            var playerTwoId = GetPlayerId(game, 1);
+
+            result.TryPickT0(out var nextTurnResult, out _).ShouldBeTrue();
+            nextTurnResult.CurrentRound.ShouldBe(1);
+            nextTurnResult.PlayerTurn.Id.ShouldBe(playerTwoId);
+            nextTurnResult.PlayerTurn.Name.ShouldBe("Player2");
+            nextTurnResult.PlayerTurn.Order.ShouldBe(2);
+            nextTurnResult.PreviousPlayerGuessStatus.ShouldBe(FailedGuessHint.TooHigh);
+
+            game.Changes.Count().ShouldBe(6);
+
+            var guessTooHighEvent = game.Changes.ElementAt(4).ShouldBeOfType<GuessTooHighEvent>();
+            guessTooHighEvent.AggregateId.ShouldBe(game.Id);
+            guessTooHighEvent.PlayerId.ShouldBe(playerOneId);
+            guessTooHighEvent.GuessAttempt.Guess.ShouldBe(99);
+            guessTooHighEvent.GuessAttempt.Status.ShouldBe(PlayerGuessStatus.TooHigh);
+
+            var newPlayerTurnEvent = game.Changes.ElementAt(5).ShouldBeOfType<NewPlayerTurnEvent>();
+            newPlayerTurnEvent.AggregateId.ShouldBe(game.Id);
+            newPlayerTurnEvent.PlayerId.ShouldBe(playerTwoId);
+            newPlayerTurnEvent.Round.ShouldBe(1);
+        }
+
+        private static Guid GetPlayerId(GameAggregate game, int index)
         {
             var playersAddedEvent = game.Changes.ElementAt(1).ShouldBeOfType<PlayersAddedEvent>();
             var player = playersAddedEvent.Players[index];
