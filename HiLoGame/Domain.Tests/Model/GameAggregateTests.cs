@@ -2,6 +2,7 @@
 using Domain.Events;
 using Domain.Model;
 using Domain.Model.Entities;
+using Domain.Model.Enums;
 using Moq;
 using Shouldly;
 
@@ -71,18 +72,18 @@ namespace Domain.Tests.Model
             var playersAddedEvent = game.Changes.ElementAt(1).ShouldBeOfType<PlayersAddedEvent>();
             playersAddedEvent.AggregateId.ShouldBe(game.Id);
 
-            var firstPlayer = playersAddedEvent.Players[0];
-            var secondPlayer = playersAddedEvent.Players[1];
+            var playerOne = playersAddedEvent.Players[0];
+            var playerTwo = playersAddedEvent.Players[1];
 
-            firstPlayer.Id.ShouldNotBe(Guid.Empty);
-            firstPlayer.Name.ShouldBe("Player1");
-            firstPlayer.Order.ShouldBe(1);
-            firstPlayer.GuessAttempts.ShouldBeEmpty();
+            playerOne.Id.ShouldNotBe(Guid.Empty);
+            playerOne.Name.ShouldBe("Player1");
+            playerOne.Order.ShouldBe(1);
+            playerOne.GuessAttempts.ShouldBeEmpty();
 
-            secondPlayer.Id.ShouldNotBe(Guid.Empty);
-            secondPlayer.Name.ShouldBe("Player2");
-            secondPlayer.Order.ShouldBe(2);
-            secondPlayer.GuessAttempts.ShouldBeEmpty();
+            playerTwo.Id.ShouldNotBe(Guid.Empty);
+            playerTwo.Name.ShouldBe("Player2");
+            playerTwo.Order.ShouldBe(2);
+            playerTwo.GuessAttempts.ShouldBeEmpty();
 
             var newRoundStartedEvent = game.Changes.ElementAt(2).ShouldBeOfType<NewRoundStartedEvent>();
             newRoundStartedEvent.AggregateId.ShouldBe(game.Id);
@@ -90,8 +91,13 @@ namespace Domain.Tests.Model
 
             var newPlayerTurnEvent = game.Changes.ElementAt(3).ShouldBeOfType<NewPlayerTurnEvent>();
             newPlayerTurnEvent.AggregateId.ShouldBe(game.Id);
-            newPlayerTurnEvent.PlayerId.ShouldBe(firstPlayer.Id);
+            newPlayerTurnEvent.PlayerId.ShouldBe(playerOne.Id);
             newPlayerTurnEvent.Round.ShouldBe(1);
+
+            result.CurrentRound.ShouldBe(1);
+            result.PlayerTurn.Id.ShouldNotBe(playerOne.Id);
+            result.PlayerTurn.Name.ShouldBe("Player1");
+            result.PlayerTurn.Order.ShouldBe(1);
         }
 
         [Fact]
@@ -121,20 +127,48 @@ namespace Domain.Tests.Model
             Assert.Throws<InvalidOperationException>(() => game.GuessMisteryNumber(secondPlayerId, 50));
         }
 
-        //[Fact]
-        //public void Guess_mistery_number_throws_an_exception_when_game_is_finished()
-        //{
-        //    // Arrange
-        //    var game = new GameAggregate(1, 100, _randomProviderMock.Object);
-        //    var playerNames = new[]
-        //    {
-        //        "Player1",
-        //        "Player2"
-        //    };
-        //    var addPlayersResult = game.AddPlayers(playerNames);
+        [Fact]
+        public void Guess_mistery_number_returns_next_turn_result_when_guess_from_first_player_is_too_low()
+        {
+            // Arrange
+            var game = new GameAggregate(1, 100, _randomProviderMock.Object);
+            var playerNames = new[] { "Player1", "Player2" };
+            var initialTurnResult = game.AddPlayers(playerNames);            
 
-        //    // Act & Assert
-        //    Assert.Throws<InvalidOperationException>(() => game.GuessMisteryNumber(Guid.NewGuid(), 50));
-        //}
+            // Act
+            var result = game.GuessMisteryNumber(initialTurnResult.PlayerTurn.Id, 14);
+
+            // Assert
+            var playerOneId = GetPlayerId(game, 0);
+            var playerTwoId = GetPlayerId(game, 1);
+
+            result.TryPickT0(out var nextTurnResult, out _).ShouldBeTrue();
+            nextTurnResult.CurrentRound.ShouldBe(1);
+            nextTurnResult.PlayerTurn.Id.ShouldBe(playerTwoId);
+            nextTurnResult.PlayerTurn.Name.ShouldBe("Player2");
+            nextTurnResult.PlayerTurn.Order.ShouldBe(2);
+            nextTurnResult.PreviousPlayerGuessStatus.ShouldBe(FailedGuessHint.TooLow);
+
+            game.Changes.Count().ShouldBe(6);
+
+            var guessTooLowEvent = game.Changes.ElementAt(4).ShouldBeOfType<GuessTooLowEvent>();
+            guessTooLowEvent.AggregateId.ShouldBe(game.Id);
+            guessTooLowEvent.PlayerId.ShouldBe(playerOneId);
+            guessTooLowEvent.GuessAttempt.Guess.ShouldBe(14);
+            guessTooLowEvent.GuessAttempt.Status.ShouldBe(PlayerGuessStatus.TooLow);
+
+            var newPlayerTurnEvent = game.Changes.ElementAt(5).ShouldBeOfType<NewPlayerTurnEvent>();
+            newPlayerTurnEvent.AggregateId.ShouldBe(game.Id);
+            newPlayerTurnEvent.PlayerId.ShouldBe(playerTwoId);
+            newPlayerTurnEvent.Round.ShouldBe(1);
+        }
+
+        private Guid GetPlayerId(GameAggregate game, int index)
+        {
+            var playersAddedEvent = game.Changes.ElementAt(1).ShouldBeOfType<PlayersAddedEvent>();
+            var player = playersAddedEvent.Players[index];
+
+            return player.Id;
+        }
     }
 }

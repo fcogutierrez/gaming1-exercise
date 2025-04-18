@@ -66,21 +66,6 @@ public sealed class GameAggregate : AggregateBase
 
         var guessAttempt = GuessAttempt.Create(guess, _misteryNumber);
 
-        switch (guessAttempt.Status)
-        {
-            case PlayerGuessStatus.TooLow:
-                ApplyDomainEvent(new GuessTooLowEvent(Id, playerId, guessAttempt));
-                break;
-            case PlayerGuessStatus.TooHigh:
-                ApplyDomainEvent(new GuessTooHighEvent(Id, playerId, guessAttempt));
-                break;
-            case PlayerGuessStatus.Correct:
-                ApplyDomainEvent(new GuessCorrectEvent(Id, playerId, guessAttempt));
-                break;
-            default:
-                throw new InvalidOperationException("Invalid guess attempt status");
-        }
-
         if (guessAttempt.Status is PlayerGuessStatus.TooLow)
         {
             ApplyDomainEvent(new GuessTooLowEvent(Id, playerId, guessAttempt));
@@ -94,8 +79,12 @@ public sealed class GameAggregate : AggregateBase
             ApplyDomainEvent(new GuessCorrectEvent(Id, playerId, guessAttempt));
             return new MisteryNumberGuessedResult(new WinnerPlayer(player.Id, player.Order, player.Name), guess);
         }
+        else
+        {
+            throw new ArgumentOutOfRangeException(nameof(guessAttempt.Status), guessAttempt.Status, "The guess status is not supporteda");
+        }
 
-        if (IsNextPlayerTheLastInRound())
+        if (IsCurrentPlayerTheLastInRound())
         {
             int newRound = _round + 1;
             ApplyDomainEvent(new NewRoundStartedEvent(Id, newRound));
@@ -118,7 +107,7 @@ public sealed class GameAggregate : AggregateBase
         RegisterDomainEventApplier<GuessCorrectEvent>(Apply);
     }
 
-    private bool IsNextPlayerTheLastInRound() => _nextPlayer.Order == _maxOrder;
+    private bool IsCurrentPlayerTheLastInRound() => _nextPlayer.Order == _maxOrder;
 
     private Player GetNewNextPlayer()
     {
@@ -127,7 +116,7 @@ public sealed class GameAggregate : AggregateBase
             return _players.First();
         }
 
-        var nextPlayerIndex = (_nextPlayer.Order + 1) % _players.Count;
+        var nextPlayerIndex = _nextPlayer.Order % _players.Count;
         return _players.ElementAt(nextPlayerIndex);
     }
 
