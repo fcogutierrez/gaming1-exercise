@@ -4,24 +4,20 @@ namespace Domain.Model.Entities;
 
 internal sealed class Player
 {
-    public int Id { get; }
+    public Guid Id { get; }
     public int Order { get; set; }
     public string Name { get; }
     public IList<GuessAttempt> GuessAttempts { get; } = [];
 
-    private Player(int id, int order, string name)
+    private Player(Guid id, int order, string name)
     {
         Id = id;
         Name = name;
         Order = order;
     }
 
-    public static Player Create(int id, int order, string name)
+    public static Player Create(Guid id, int order, string name)
     {
-        if (id < 0)
-        {
-            throw new ArgumentException("Player ID must be non-negative", nameof(id));
-        }
         if (order < 0)
         {
             throw new ArgumentException("Player order must be non-negative", nameof(order));

@@ -10,22 +10,10 @@ namespace Domain.Tests.Entities;
 public sealed class PlayerTests
 {
     [Fact]
-    public void Create_throws_an_exception_when_id_is_negative()
-    {
-        // Arrange
-        var id = -1;
-        var order = 1;
-        var name = "Player1";
-
-        // Act & Assert
-        Assert.Throws<ArgumentException>(() => Player.Create(id, order, name));
-    }
-
-    [Fact]
     public void Create_throws_an_exception_when_order_is_negative()
     {
         // Arrange
-        var id = 1;
+        var id = Guid.NewGuid();
         var order = -1;
         var name = "Player1";
 
@@ -33,14 +21,25 @@ public sealed class PlayerTests
         Assert.Throws<ArgumentException>(() => Player.Create(id, order, name));
     }
 
+    [Fact]
+    public void Create_throws_an_exception_when_name_is_null()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var order = 1;
+
+        // Act & Assert
+        Assert.Throws<ArgumentException>(() => Player.Create(id, order, null));
+    }
+
     [Theory]
     [InlineData("")]
     [InlineData(" ")]
-    [InlineData(null)]
+    [InlineData("  ")]
     public void Create_throws_an_exception_when_name_is_empty(string name)
     {
         // Arrange
-        var id = 1;
+        var id = Guid.NewGuid();
         var order = 1;
 
         // Act & Assert
@@ -51,7 +50,7 @@ public sealed class PlayerTests
     public void Create_returns_correct_player()
     {
         // Arrange
-        var id = 0;
+        var id = Guid.NewGuid();
         var order = 1;
         var name = "Player1";
 
@@ -68,7 +67,7 @@ public sealed class PlayerTests
     public void AddGuessAttempt_adds_guess_attempt_to_player()
     {
         // Arrange
-        var id = 0;
+        var id = Guid.NewGuid();
         var order = 1;
         var name = "Player1";
         var player = Player.Create(id, order, name);

@@ -14,7 +14,7 @@ internal sealed class GameAggregate : AggregateBase
     private List<Player> _players = [];
     private int _maxOrder = 0;
     private Player _nextPlayer = null!;
-    private int? _winnerId = null;
+    private Guid? _winnerId = null;
 
     public GameAggregate(int min, int max, IRandomProvider randomProvider) : base()
     {        
@@ -32,7 +32,7 @@ internal sealed class GameAggregate : AggregateBase
             throw new ArgumentException("Player names cannot be empty", nameof(playerNames));
         }
 
-        var players = playerNames.Select((name, index) => Player.Create(index, index + 1, name)).ToList();
+        var players = playerNames.Select((name, index) => Player.Create(Guid.NewGuid(), index + 1, name)).ToList();
         Apply(new PlayersCreatedEvent(Id, players));
 
         Apply(new NewRoundStartedEvent(Id, _round));
@@ -43,7 +43,7 @@ internal sealed class GameAggregate : AggregateBase
         return new CreatePlayersResult(nextPlayer.Id, nextPlayer.Order, nextPlayer.Name, _round);
     }
 
-    public void GuessMisteryNumber(int playerId, int guess)
+    public void GuessMisteryNumber(Guid playerId, int guess)
     {
         if (_winnerId is not null)
         {
@@ -157,4 +157,4 @@ internal sealed class GameAggregate : AggregateBase
     }
 }
 
-internal sealed record CreatePlayersResult(int NextPlayerId, int NextPlayerOrder, string NextPlayerNam, int CurrentRound);
+internal sealed record CreatePlayersResult(Guid NextPlayerId, int NextPlayerOrder, string NextPlayerNam, int CurrentRound);

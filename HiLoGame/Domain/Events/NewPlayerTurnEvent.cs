@@ -2,4 +2,4 @@
 
 namespace Domain.Events;
 
-internal sealed record NewPlayerTurnEvent(Guid Id, int PlayerId, int Round) : IDomainEvent;
+internal sealed record NewPlayerTurnEvent(Guid Id, Guid PlayerId, int Round) : IDomainEvent;

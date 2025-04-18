@@ -4,6 +4,6 @@ namespace Domain.Contracts;
 
 internal interface IGuessEvent : IDomainEvent
 {
-    int PlayerId { get; }
+    Guid PlayerId { get; }
     GuessAttempt GuessAttempt { get; }
 }
