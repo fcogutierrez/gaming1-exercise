@@ -1,4 +1,6 @@
-﻿using HiLoGame.Api.Requests;
+﻿using Application.Commands;
+using Application.Contracts;
+using HiLoGame.Api.Requests;
 
 namespace HiLoGame.Api;
 
@@ -9,9 +11,16 @@ internal static class Endpoints
         RouteGroupBuilder api = app.MapGroup("/games/hilo");
 
         api.MapPost(
-            "/", (CreateGameRequest request) =>
+            "/",
+            async (
+                CreateGameRequest request,
+                ICommandHandler<CreateGameCommand, CreateGameCommandResult> commandHandler
+            ) =>
             {
-                return Results.Ok("Welcome to the HiLo Game API!");
+                var command = CreateGameRequest.ToCommand(request);
+                var result = await commandHandler.Handle(command);
+
+                return result.ToResponse();
             }).WithName(EndpointNames.CreateGame);
 
         return app;

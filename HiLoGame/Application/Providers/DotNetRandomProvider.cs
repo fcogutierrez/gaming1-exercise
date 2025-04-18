@@ -1,7 +1,7 @@
 ﻿using Domain.Contracts;
 using System;
 
-namespace Application;
+namespace Application.Providers;
 
 internal sealed class DotNetRandomProvider : IRandomProvider
 {

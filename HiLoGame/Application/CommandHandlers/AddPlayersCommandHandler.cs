@@ -5,7 +5,8 @@ using Domain.Model;
 
 namespace Application.CommandHandlers;
 
-public sealed class AddPlayersCommandHandler(IEventStorage eventStorage) : ICommandHandler<AddPlayersCommand, AddPlayersCommandResult>
+public sealed class AddPlayersCommandHandler(IEventStorage eventStorage) 
+    : ICommandHandler<AddPlayersCommand, AddPlayersCommandResult>
 {
     private readonly IEventStorage _eventStorage = eventStorage;
 
