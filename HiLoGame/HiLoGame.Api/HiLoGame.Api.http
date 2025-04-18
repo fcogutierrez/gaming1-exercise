@@ -13,10 +13,20 @@ Content-Type: application/json
 ###
 
 ### Add players
+# @name addPlayers
 POST {{HiLoGame.Api_HostAddress}}/games/hilo/{{createGame.response.body.$.id}}/players
 Content-Type: application/json
 
 {
-  "playerNames": ["Bill Gates", "Steve Jobs"]
+  "playerNames": ["Mark Zuckerberg"]
+}
+###
+
+### Guess number
+POST {{HiLoGame.Api_HostAddress}}/games/hilo/{{createGame.response.body.$.id}}/players/{{addPlayers.response.body.$.playerTurn.id}}/guess
+Content-Type: application/json
+
+{
+  "guess": 57
 }
 ###

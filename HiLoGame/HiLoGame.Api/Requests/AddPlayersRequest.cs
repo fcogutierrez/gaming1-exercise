@@ -18,7 +18,7 @@ public static class AddPlayersResponseExtensions
     public static IResult ToResponse(this AddPlayersCommandResult commandResult) =>
         Results.Ok(new AddPlayersResponse(commandResult.PlayerTurn.ToResponse(), commandResult.CurrentRound));
 
-    private static PlayerTurnResponse ToResponse(this PlayerTurn playerTurn) =>
+    public static PlayerTurnResponse ToResponse(this PlayerTurn playerTurn) =>
         new PlayerTurnResponse(playerTurn.Id, playerTurn.Order, playerTurn.Name);
 }
 
