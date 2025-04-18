@@ -235,6 +235,44 @@ namespace Domain.Tests.Model
             newPlayerTurnEvent.Round.ShouldBe(2);
         }
 
+        [Fact]
+        public void Guess_mistery_number_returns_number_guessed_result()
+        {
+            // Arrange
+            var game = new GameAggregate(1, 100, _randomProviderMock.Object);
+            var playerNames = new[] { "Player1", "Player2" };
+            var initialTurnResult = game.AddPlayers(playerNames);
+            
+            var firstGuessResult = game.GuessMisteryNumber(initialTurnResult.PlayerTurn.Id, 83);
+            firstGuessResult.TryPickT0(out NextTurnResult secondTurn, out _);
+
+            var secondGuessResult = game.GuessMisteryNumber(secondTurn.PlayerTurn.Id, 23);
+            secondGuessResult.TryPickT0(out var thirdTurn, out _).ShouldBeTrue();
+
+            var thirdGuessResult = game.GuessMisteryNumber(thirdTurn.PlayerTurn.Id, 45);
+            firstGuessResult.TryPickT0(out NextTurnResult fourthTurn, out _);
+
+            // Act
+            var fourthGuessResult = game.GuessMisteryNumber(fourthTurn.PlayerTurn.Id, 58);
+
+            // Assert
+            fourthGuessResult.TryPickT1(out MisteryNumberGuessedResult numberGuessed, out _);
+
+            var playerOneId = GetPlayerId(game, index: 0);
+            var playerTwoId = GetPlayerId(game, index: 1);
+
+            numberGuessed.Value.ShouldBe(58);
+            numberGuessed.Winner.Id.ShouldBe(playerTwoId);
+            numberGuessed.Winner.Name.ShouldBe("Player2");
+            numberGuessed.Winner.Order.ShouldBe(2);
+
+            var guessCorrectEvent = game.Changes.ElementAt(11).ShouldBeOfType<GuessCorrectEvent>();
+            guessCorrectEvent.AggregateId.ShouldBe(game.Id);
+            guessCorrectEvent.PlayerId.ShouldBe(playerTwoId);
+            guessCorrectEvent.GuessAttempt.Guess.ShouldBe(58);
+            guessCorrectEvent.GuessAttempt.Status.ShouldBe(PlayerGuessStatus.Correct);
+        }
+
         private static Guid GetPlayerId(GameAggregate game, int index)
         {
             var playersAddedEvent = game.Changes.ElementAt(1).ShouldBeOfType<PlayersAddedEvent>();
