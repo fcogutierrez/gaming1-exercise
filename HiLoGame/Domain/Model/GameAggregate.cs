@@ -43,6 +43,11 @@ public sealed class GameAggregate : AggregateBase
             throw new ArgumentException("Player names cannot be empty", nameof(playerNames));
         }
 
+        if (_players.Any())
+        {
+            throw new InvalidOperationException("Players have already been added");
+        }
+
         var players = playerNames.Select((name, index) => Player.Create(Guid.NewGuid(), index + 1, name)).ToList();
         ApplyDomainEvent(new PlayersAddedEvent(Id, players));
 

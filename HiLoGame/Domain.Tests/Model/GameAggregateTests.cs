@@ -53,6 +53,18 @@ namespace Domain.Tests.Model
         }
 
         [Fact]
+        public void Add_players_throws_an_exception_when_players_are_already_added()
+        {
+            // Arrange
+            var game = new GameAggregate(1, 100, Mock.Of<IRandomProvider>());
+            var playerNames = new[] { "Player1", "Player2" };
+            game.AddPlayers(playerNames);
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => game.AddPlayers(playerNames));
+        }
+
+        [Fact]
         public void Add_players_adds_players_and_starts_the_first_turn_in_the_first_round()
         {
             // Arrange
