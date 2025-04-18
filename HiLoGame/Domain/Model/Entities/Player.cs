@@ -39,4 +39,3 @@ internal sealed class Player
         GuessAttempts.Add(guessAttempt);
     }
 }
-
