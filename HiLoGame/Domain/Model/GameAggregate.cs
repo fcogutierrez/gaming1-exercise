@@ -36,7 +36,7 @@ public sealed class GameAggregate : AggregateBase
         }
     }
 
-    public InitialTurnResult AddPlayers(IEnumerable<string> playerNames)
+    public AddPlayersResult AddPlayers(IEnumerable<string> playerNames)
     {
         if (!playerNames.Any())
         {
@@ -56,7 +56,8 @@ public sealed class GameAggregate : AggregateBase
         var nextPlayer = GetNewNextPlayer();
         ApplyDomainEvent(new NewPlayerTurnEvent(Id, nextPlayer.Id, _round));
 
-        return new InitialTurnResult(new PlayerTurn(nextPlayer.Id, nextPlayer.Order, nextPlayer.Name), _round);
+        var addedPlayers = players.Select(p => new CreatedPlayer(p.Id, p.Order, p.Name)).ToList();
+        return new AddPlayersResult(addedPlayers, new PlayerTurn(nextPlayer.Id), _round);
     }
 
     public GuessMisteryNumberResult GuessMisteryNumber(Guid playerId, int guess)
@@ -90,7 +91,7 @@ public sealed class GameAggregate : AggregateBase
         else if (guessAttempt.Status is PlayerGuessStatus.Correct)
         {
             ApplyDomainEvent(new GuessCorrectEvent(Id, playerId, guessAttempt));
-            return new MisteryNumberGuessedResult(new WinnerPlayer(player.Id, player.Order, player.Name), guess);
+            return new MisteryNumberGuessedResult(new WinnerPlayer(player.Id), guess);
         }
         else
         {
@@ -106,7 +107,7 @@ public sealed class GameAggregate : AggregateBase
         var newNextPlayer = GetNewNextPlayer();
         ApplyDomainEvent(new NewPlayerTurnEvent(Id, newNextPlayer.Id, _round));
 
-        return new NextTurnResult(new PlayerTurn(newNextPlayer.Id, newNextPlayer.Order, newNextPlayer.Name), _round, MapToFailedGuessHint(guessAttempt.Status));
+        return new NextTurnResult(new PlayerTurn(newNextPlayer.Id), _round, MapToFailedGuessHint(guessAttempt.Status));
     }
 
     protected override void RegisterDomainEventAppliers()
@@ -185,16 +186,17 @@ public sealed class GameAggregate : AggregateBase
     }
 }
 
-public sealed record InitialTurnResult(PlayerTurn PlayerTurn, int CurrentRound);
+public sealed record AddPlayersResult(IList<CreatedPlayer> Players, PlayerTurn PlayerTurn, int CurrentRound);
 
 public sealed record NextTurnResult(PlayerTurn PlayerTurn, int CurrentRound, FailedGuessHint PreviousPlayerGuessStatus);
 
 public sealed record MisteryNumberGuessedResult(WinnerPlayer Winner, int Value);
 
-public record PlayerTurn(Guid Id, int Order, string Name);
+public record CreatedPlayer(Guid Id, int Order, string Name);
 
-public sealed record WinnerPlayer(Guid Id, int Order, string Name)
-    : PlayerTurn(Id, Order, Name);
+public sealed record PlayerTurn(Guid Id);
+
+public sealed record WinnerPlayer(Guid Id);
 
 public enum FailedGuessHint
 {

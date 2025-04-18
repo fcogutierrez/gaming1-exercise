@@ -76,7 +76,7 @@ namespace Domain.Tests.Model
             };
 
             // Act
-            var initialTurnResult = game.AddPlayers(playerNames);
+            var addPlayersResult = game.AddPlayers(playerNames);
 
             // Assert
             game.Changes.Count().ShouldBe(4);
@@ -106,10 +106,14 @@ namespace Domain.Tests.Model
             newPlayerTurnEvent.PlayerId.ShouldBe(playerOne.Id);
             newPlayerTurnEvent.Round.ShouldBe(1);
 
-            initialTurnResult.CurrentRound.ShouldBe(1);
-            initialTurnResult.PlayerTurn.Id.ShouldBe(playerOne.Id);
-            initialTurnResult.PlayerTurn.Name.ShouldBe("Player1");
-            initialTurnResult.PlayerTurn.Order.ShouldBe(1);
+            addPlayersResult.CurrentRound.ShouldBe(1);
+            addPlayersResult.PlayerTurn.Id.ShouldBe(playerOne.Id);
+            addPlayersResult.Players[0].Id.ShouldBe(playerOne.Id);
+            addPlayersResult.Players[0].Name.ShouldBe(playerOne.Name);
+            addPlayersResult.Players[0].Order.ShouldBe(playerOne.Order);
+            addPlayersResult.Players[1].Id.ShouldBe(playerTwo.Id);
+            addPlayersResult.Players[1].Name.ShouldBe(playerTwo.Name);
+            addPlayersResult.Players[1].Order.ShouldBe(playerTwo.Order);
         }
 
         [Fact]
@@ -158,10 +162,10 @@ namespace Domain.Tests.Model
             // Arrange
             var game = new GameAggregate(1, 100, _randomProviderMock.Object);
             var playerNames = new[] { "Player1", "Player2" };
-            var initialTurnResult = game.AddPlayers(playerNames);            
+            var addPlayersResult = game.AddPlayers(playerNames);            
 
             // Act
-            var result = game.GuessMisteryNumber(initialTurnResult.PlayerTurn.Id, 14);
+            var result = game.GuessMisteryNumber(addPlayersResult.PlayerTurn.Id, 14);
 
             // Assert
             var playerOneId = GetPlayerId(game, index: 0);
@@ -170,8 +174,6 @@ namespace Domain.Tests.Model
             result.TryPickT0(out var nextTurnResult, out _).ShouldBeTrue();
             nextTurnResult.CurrentRound.ShouldBe(1);
             nextTurnResult.PlayerTurn.Id.ShouldBe(playerTwoId);
-            nextTurnResult.PlayerTurn.Name.ShouldBe("Player2");
-            nextTurnResult.PlayerTurn.Order.ShouldBe(2);
             nextTurnResult.PreviousPlayerGuessStatus.ShouldBe(FailedGuessHint.TooLow);
 
             game.Changes.Count().ShouldBe(6);
@@ -194,10 +196,10 @@ namespace Domain.Tests.Model
             // Arrange
             var game = new GameAggregate(1, 100, _randomProviderMock.Object);
             var playerNames = new[] { "Player1", "Player2" };
-            var initialTurnResult = game.AddPlayers(playerNames);
+            var addPlayersResult = game.AddPlayers(playerNames);
 
             // Act
-            var result = game.GuessMisteryNumber(initialTurnResult.PlayerTurn.Id, 83);
+            var result = game.GuessMisteryNumber(addPlayersResult.PlayerTurn.Id, 83);
 
             // Assert
             var playerOneId = GetPlayerId(game, 0);
@@ -206,8 +208,6 @@ namespace Domain.Tests.Model
             result.TryPickT0(out var nextTurnResult, out _).ShouldBeTrue();
             nextTurnResult.CurrentRound.ShouldBe(1);
             nextTurnResult.PlayerTurn.Id.ShouldBe(playerTwoId);
-            nextTurnResult.PlayerTurn.Name.ShouldBe("Player2");
-            nextTurnResult.PlayerTurn.Order.ShouldBe(2);
             nextTurnResult.PreviousPlayerGuessStatus.ShouldBe(FailedGuessHint.TooHigh);
 
             game.Changes.Count().ShouldBe(6);
@@ -230,8 +230,8 @@ namespace Domain.Tests.Model
             // Arrange
             var game = new GameAggregate(1, 100, _randomProviderMock.Object);
             var playerNames = new[] { "Player1", "Player2" };
-            var initialTurnResult = game.AddPlayers(playerNames);
-            var firstGuessResult = game.GuessMisteryNumber(initialTurnResult.PlayerTurn.Id, 83);
+            var addPlayersResult = game.AddPlayers(playerNames);
+            var firstGuessResult = game.GuessMisteryNumber(addPlayersResult.PlayerTurn.Id, 83);
             firstGuessResult.TryPickT0(out NextTurnResult secondTurn, out _);
 
             // Act
@@ -244,8 +244,6 @@ namespace Domain.Tests.Model
             secondGuessResult.TryPickT0(out var thirdTurn, out _).ShouldBeTrue();
             thirdTurn.CurrentRound.ShouldBe(2);
             thirdTurn.PlayerTurn.Id.ShouldBe(playerOneId);
-            thirdTurn.PlayerTurn.Name.ShouldBe("Player1");
-            thirdTurn.PlayerTurn.Order.ShouldBe(1);
             thirdTurn.PreviousPlayerGuessStatus.ShouldBe(FailedGuessHint.TooLow);
 
             game.Changes.Count().ShouldBe(9);
@@ -266,9 +264,9 @@ namespace Domain.Tests.Model
             // Arrange
             var game = new GameAggregate(1, 100, _randomProviderMock.Object);
             var playerNames = new[] { "Player1", "Player2" };
-            var initialTurnResult = game.AddPlayers(playerNames);
+            var addPlayersResult = game.AddPlayers(playerNames);
             
-            var firstGuessResult = game.GuessMisteryNumber(initialTurnResult.PlayerTurn.Id, 83);
+            var firstGuessResult = game.GuessMisteryNumber(addPlayersResult.PlayerTurn.Id, 83);
             firstGuessResult.TryPickT0(out NextTurnResult secondTurn, out _);
 
             var secondGuessResult = game.GuessMisteryNumber(secondTurn.PlayerTurn.Id, 23);
@@ -281,15 +279,13 @@ namespace Domain.Tests.Model
             var fourthGuessResult = game.GuessMisteryNumber(fourthTurn.PlayerTurn.Id, MisteryNumber);
 
             // Assert
-            fourthGuessResult.TryPickT1(out MisteryNumberGuessedResult numberGuessed, out _);
-
             var playerOneId = GetPlayerId(game, index: 0);
             var playerTwoId = GetPlayerId(game, index: 1);
 
+            fourthGuessResult.TryPickT1(out MisteryNumberGuessedResult numberGuessed, out _);
+
             numberGuessed.Value.ShouldBe(MisteryNumber);
             numberGuessed.Winner.Id.ShouldBe(playerTwoId);
-            numberGuessed.Winner.Name.ShouldBe("Player2");
-            numberGuessed.Winner.Order.ShouldBe(2);
 
             var guessCorrectEvent = game.Changes.ElementAt(11).ShouldBeOfType<GuessCorrectEvent>();
             guessCorrectEvent.AggregateId.ShouldBe(game.Id);

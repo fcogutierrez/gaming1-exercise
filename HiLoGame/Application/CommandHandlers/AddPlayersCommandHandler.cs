@@ -18,6 +18,6 @@ public sealed class AddPlayersCommandHandler(IEventStorage eventStorage)
         var result  = game.AddPlayers(command.PlayerNames);
         await _eventStorage.SaveMany(game.Changes);
 
-        return new AddPlayersCommandResult(result.PlayerTurn, result.CurrentRound);
+        return new AddPlayersCommandResult(result.Players, result.PlayerTurn, result.CurrentRound);
     }
 }

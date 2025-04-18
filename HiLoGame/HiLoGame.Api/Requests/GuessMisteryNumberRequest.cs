@@ -16,7 +16,7 @@ public sealed record NextTurnResponse(PlayerTurnResponse PlayerTurn, int Current
 
 public sealed record MisteryNumberGuessedResponse(WinnerPlayerResponse Winner, int Value);
 
-public sealed record WinnerPlayerResponse(Guid Id, int Order, string Name);
+public sealed record WinnerPlayerResponse(Guid Id);
 
 public static class GuessMisteryNumberResponseExtensions
 {
@@ -33,5 +33,5 @@ public static class GuessMisteryNumberResponseExtensions
 
 
     public static WinnerPlayerResponse ToResponse(this WinnerPlayer winner) =>
-        new(winner.Id, winner.Order, winner.Name);
+        new(winner.Id);
 }

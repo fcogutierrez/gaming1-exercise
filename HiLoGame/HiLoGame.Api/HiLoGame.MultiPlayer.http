@@ -1,8 +1,8 @@
-@HiLoGame.Api_HostAddress = http://localhost:32768
+@host = http://localhost:32774
 
 ### Create a new HiLo game
 # @name createGame
-POST {{HiLoGame.Api_HostAddress}}/games/hilo/
+POST {{host}}/games/hilo/
 Content-Type: application/json
 
 {
@@ -12,9 +12,11 @@ Content-Type: application/json
 
 ###
 
+@gameId = {{createGame.response.body.$.id}}
+
 ### Add players
 # @name addPlayers
-POST {{HiLoGame.Api_HostAddress}}/games/hilo/{{createGame.response.body.$.id}}/players
+POST {{host}}/games/hilo/{{createGame.response.body.$.id}}/players
 Content-Type: application/json
 
 {
@@ -22,8 +24,20 @@ Content-Type: application/json
 }
 ###
 
-### Guess number
-POST {{HiLoGame.Api_HostAddress}}/games/hilo/{{createGame.response.body.$.id}}/players/{{addPlayers.response.body.$.playerTurn.id}}/guess
+@playerOneId = {{addPlayers.response.body.$.players[0].id}}
+@playerTwoId = {{addPlayers.response.body.$.players[1].id}}
+
+### Guess from Steve Jobs (Player 1)
+POST {{host}}/games/hilo/{{{{gameId}}}}/players/{{{{playerOneId}}}}/guess
+Content-Type: application/json
+
+{
+  "guess": 57
+}
+###
+
+### Guess from Bill Gates (Player 2)
+POST {{host}}/games/hilo/{{{{gameId}}}}/players/{{{{playerTwoId}}}}/guess
 Content-Type: application/json
 
 {
