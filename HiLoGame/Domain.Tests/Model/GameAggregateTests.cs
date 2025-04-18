@@ -139,8 +139,8 @@ namespace Domain.Tests.Model
             var result = game.GuessMisteryNumber(initialTurnResult.PlayerTurn.Id, 14);
 
             // Assert
-            var playerOneId = GetPlayerId(game, 0);
-            var playerTwoId = GetPlayerId(game, 1);
+            var playerOneId = GetPlayerId(game, index: 0);
+            var playerTwoId = GetPlayerId(game, index: 1);
 
             result.TryPickT0(out var nextTurnResult, out _).ShouldBeTrue();
             nextTurnResult.CurrentRound.ShouldBe(1);
@@ -197,6 +197,42 @@ namespace Domain.Tests.Model
             newPlayerTurnEvent.AggregateId.ShouldBe(game.Id);
             newPlayerTurnEvent.PlayerId.ShouldBe(playerTwoId);
             newPlayerTurnEvent.Round.ShouldBe(1);
+        }
+
+        [Fact]
+        public void Guess_mistery_number_returns_next_turn_result_and_starts_second_round_when_guess_from_second_player_has_failed()
+        {
+            // Arrange
+            var game = new GameAggregate(1, 100, _randomProviderMock.Object);
+            var playerNames = new[] { "Player1", "Player2" };
+            var initialTurnResult = game.AddPlayers(playerNames);
+            var firstGuessResult = game.GuessMisteryNumber(initialTurnResult.PlayerTurn.Id, 83);
+            firstGuessResult.TryPickT0(out NextTurnResult secondTurn, out _);
+
+            // Act
+            var secondGuessResult = game.GuessMisteryNumber(secondTurn.PlayerTurn.Id, 23);
+
+            // Assert
+            var playerOneId = GetPlayerId(game, index: 0);
+            var playerTwoId = GetPlayerId(game, index: 1);
+
+            secondGuessResult.TryPickT0(out var thirdTurn, out _).ShouldBeTrue();
+            thirdTurn.CurrentRound.ShouldBe(2);
+            thirdTurn.PlayerTurn.Id.ShouldBe(playerOneId);
+            thirdTurn.PlayerTurn.Name.ShouldBe("Player1");
+            thirdTurn.PlayerTurn.Order.ShouldBe(1);
+            thirdTurn.PreviousPlayerGuessStatus.ShouldBe(FailedGuessHint.TooLow);
+
+            game.Changes.Count().ShouldBe(9);
+
+            var newRoundStartedEvent = game.Changes.ElementAt(7).ShouldBeOfType<NewRoundStartedEvent>();
+            newRoundStartedEvent.AggregateId.ShouldBe(game.Id);
+            newRoundStartedEvent.Round.ShouldBe(2);
+
+            var newPlayerTurnEvent = game.Changes.ElementAt(8).ShouldBeOfType<NewPlayerTurnEvent>();
+            newPlayerTurnEvent.AggregateId.ShouldBe(game.Id);
+            newPlayerTurnEvent.PlayerId.ShouldBe(playerOneId);
+            newPlayerTurnEvent.Round.ShouldBe(2);
         }
 
         private static Guid GetPlayerId(GameAggregate game, int index)
