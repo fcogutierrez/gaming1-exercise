@@ -4,8 +4,8 @@ namespace HiLoGame.Api.Requests;
 
 public sealed record CreateGameRequest(int Min, int Max)
 {
-    public static CreateGameCommand ToCommand(CreateGameRequest request) =>
-        new(request.Min, request.Max);
+    public CreateGameCommand ToCommand() =>
+        new(Min, Max);
 }
 
 public sealed record CreateGameResponse(Guid Id);

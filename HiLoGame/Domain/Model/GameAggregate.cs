@@ -28,6 +28,14 @@ public sealed class GameAggregate : AggregateBase
         ApplyDomainEvent(@event);
     }
 
+    public GameAggregate(IList<IDomainEvent> domainEvents)
+    {
+        foreach (var domainEvent in domainEvents)
+        {
+            ApplyDomainEvent(domainEvent);
+        }
+    }
+
     public InitialTurnResult AddPlayers(IEnumerable<string> playerNames)
     {
         if (!playerNames.Any())

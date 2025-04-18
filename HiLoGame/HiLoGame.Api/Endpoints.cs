@@ -17,11 +17,25 @@ internal static class Endpoints
                 ICommandHandler<CreateGameCommand, CreateGameCommandResult> commandHandler
             ) =>
             {
-                var command = CreateGameRequest.ToCommand(request);
-                var result = await commandHandler.Handle(command);
+                var command = request.ToCommand();
+                var commandResult = await commandHandler.Handle(command);
 
-                return result.ToResponse();
+                return commandResult.ToResponse();
             }).WithName(EndpointNames.CreateGame);
+
+        api.MapPost(
+            "/{gameId}/players",
+            async(
+                Guid gameId,
+                AddPlayersRequest request,
+                ICommandHandler<AddPlayersCommand, AddPlayersCommandResult> commandHandler
+            ) =>
+            {
+                var command = request.ToCommand(gameId);
+                var commandResult = await commandHandler.Handle(command);
+
+                return commandResult.ToResponse();
+            }).WithName(EndpointNames.AddPlayers);
 
         return app;
     }
@@ -29,5 +43,6 @@ internal static class Endpoints
     public static class EndpointNames
     {
         public const string CreateGame = "create_game";
+        public const string AddPlayers = "add_players";
     }
 }

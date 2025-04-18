@@ -18,14 +18,6 @@ public abstract class AggregateBase
         RegisterDomainEventAppliers();
     }
 
-    public AggregateBase(IList<IDomainEvent> domainEvents)
-    {
-        foreach (var domainEvent in domainEvents)
-        {
-            ApplyDomainEvent(domainEvent);
-        }
-    }
-
     protected abstract void RegisterDomainEventAppliers();
 
     protected void ApplyDomainEvent(IDomainEvent domainEvent)

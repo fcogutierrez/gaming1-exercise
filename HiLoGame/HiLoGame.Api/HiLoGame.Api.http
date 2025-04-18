@@ -1,5 +1,7 @@
 @HiLoGame.Api_HostAddress = http://localhost:32768
 
+### Create a new HiLo game
+# @name createGame
 POST {{HiLoGame.Api_HostAddress}}/games/hilo/
 Content-Type: application/json
 
@@ -8,4 +10,13 @@ Content-Type: application/json
   "max": 100
 }
 
+###
+
+### Add players
+POST {{HiLoGame.Api_HostAddress}}/games/hilo/{{createGame.response.body.$.id}}/players
+Content-Type: application/json
+
+{
+  "playerNames": ["Bill Gates", "Steve Jobs"]
+}
 ###
