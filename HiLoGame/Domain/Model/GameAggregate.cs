@@ -16,18 +16,12 @@ internal sealed class GameAggregate : AggregateBase
     private Player _nextPlayer = null!;
     private int? _winnerId = null;
 
-    public GameAggregate(int min, int max, IEnumerable<string> playerNames) : base()
-    {
-        if (!playerNames.Any())
-        {
-            throw new ArgumentException("Player names cannot be empty", nameof(playerNames));
-        }
-
+    public GameAggregate(int min, int max, IRandomProvider randomProvider) : base()
+    {        
         var range = MisteryNumberRange.Create(min, max);
-        var misteryNumber = MisteryNumber.Generate(range);
-        var players = playerNames.Select((name, index) => Player.Create(index, index + 1, name));
+        var misteryNumber = MisteryNumber.Generate(range, randomProvider);
 
-        var @event = new GameCreatedEvent(Guid.NewGuid(), misteryNumber, players);
+        var @event = new GameCreatedEvent(Guid.NewGuid(), misteryNumber);
         Apply(@event);
     }
 
@@ -98,12 +92,12 @@ internal sealed class GameAggregate : AggregateBase
 
     private Player GetNewNextPlayer()
     {
-        if (_nextPlayerIndex is null)
+        if (_nextPlayer is null)
         {
             throw new InvalidOperationException("Next player index is not set");
         }
 
-        var nextPlayerIndex = (_nextPlayerIndex.Value + 1) % _players.Count();
+        var nextPlayerIndex = (_nextPlayer.Order + 1) % _players.Count;
         return _players.ElementAt(nextPlayerIndex);
     }
 
@@ -111,7 +105,6 @@ internal sealed class GameAggregate : AggregateBase
     {
         Id = @event.Id;
         _misteryNumber = @event.MisteryNumber;
-        _players = @event.Players;
 
         Save(@event);
     }

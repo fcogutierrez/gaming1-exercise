@@ -1,20 +1,21 @@
-﻿namespace Domain.Model.ValueObjects;
+﻿using Domain.Contracts;
+
+namespace Domain.Model.ValueObjects;
 
 internal sealed class MisteryNumber
 {
     public int Value { get; }
     public MisteryNumberRange Range { get; }
 
-    private MisteryNumber(MisteryNumberRange range)
+    private MisteryNumber(MisteryNumberRange range, IRandomProvider randomNumberProvider)
     {
         Range = range;
-        var random = new Random();
-        Value = random.Next(range.Min, range.Max +1);
+        Value = randomNumberProvider.GetRandomNumber(range.Min, range.Max);
     }
 
-    public static MisteryNumber Generate(MisteryNumberRange range)
+    public static MisteryNumber Generate(MisteryNumberRange range, IRandomProvider randomNumberProvider)
     {
-        return new MisteryNumber(range);
+        return new MisteryNumber(range, randomNumberProvider);
     }
 }
 
