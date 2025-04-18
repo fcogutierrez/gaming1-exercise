@@ -1,6 +1,6 @@
 @HiLoGame.Api_HostAddress = http://localhost:32768
 
-GET {{HiLoGame.Api_HostAddress}}/weatherforecast/
+GET {{HiLoGame.Api_HostAddress}}/games/hilo/
 Accept: application/json
 
 ###
