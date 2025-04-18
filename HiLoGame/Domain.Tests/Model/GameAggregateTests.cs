@@ -1,5 +1,6 @@
 ﻿using Domain.Contracts;
 using Domain.Events;
+using Domain.Exceptions;
 using Domain.Model;
 using Domain.Model.Entities;
 using Domain.Model.Enums;
@@ -61,7 +62,7 @@ namespace Domain.Tests.Model
             game.AddPlayers(playerNames);
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => game.AddPlayers(playerNames));
+            Assert.Throws<PlayersAlreadyAddedException>(() => game.AddPlayers(playerNames));
         }
 
         [Fact]
@@ -126,7 +127,7 @@ namespace Domain.Tests.Model
             game.GuessMisteryNumber(addPlayersResult.PlayerTurn.Id, MisteryNumber);
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => game.GuessMisteryNumber(addPlayersResult.PlayerTurn.Id, 50));
+            Assert.Throws<GameAlreadyFinishedException>(() => game.GuessMisteryNumber(addPlayersResult.PlayerTurn.Id, 50));
         }
 
         [Fact]
@@ -138,7 +139,7 @@ namespace Domain.Tests.Model
             game.AddPlayers(playerNames);
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() => game.GuessMisteryNumber(Guid.NewGuid(), 50));
+            Assert.Throws<PlayerNotFoundException>(() => game.GuessMisteryNumber(Guid.NewGuid(), 50));
         }
 
         [Fact]
@@ -153,7 +154,7 @@ namespace Domain.Tests.Model
             var secondPlayerId = playersAddedEvent.Players[1].Id;
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => game.GuessMisteryNumber(secondPlayerId, 50));
+            Assert.Throws<WrongPlayerTurnException>(() => game.GuessMisteryNumber(secondPlayerId, 50));
         }
 
         [Fact]

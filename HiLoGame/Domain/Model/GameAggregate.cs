@@ -1,5 +1,6 @@
 ﻿using Domain.Contracts;
 using Domain.Events;
+using Domain.Exceptions;
 using Domain.Model.Base;
 using Domain.Model.Entities;
 using Domain.Model.Enums;
@@ -45,7 +46,7 @@ public sealed class GameAggregate : AggregateBase
 
         if (_players.Any())
         {
-            throw new InvalidOperationException("Players have already been added");
+            throw new PlayersAlreadyAddedException(Id);
         }
 
         var players = playerNames.Select((name, index) => Player.Create(Guid.NewGuid(), index + 1, name)).ToList();
@@ -64,18 +65,18 @@ public sealed class GameAggregate : AggregateBase
     {
         if (_winnerId is not null)
         {
-            throw new InvalidOperationException("Game is already finished");
+            throw new GameAlreadyFinishedException(Id);
         }
 
         var player = _players.SingleOrDefault(p => p.Id == playerId);
         if (player is null)
         {
-            throw new ArgumentException($"Player with ID {playerId} was not found", nameof(playerId));
+            throw new PlayerNotFoundException(Id, playerId);
         }
 
         if (_nextPlayer.Id != player.Id)
         {
-            throw new InvalidOperationException($"It's not {player.Name}'s turn");
+            throw new WrongPlayerTurnException(Id, playerId);
         }
 
         var guessAttempt = GuessAttempt.Create(guess, _misteryNumber);
