@@ -3,9 +3,9 @@ using Domain.Model.Base;
 
 namespace Domain.Factories;
 
-internal sealed class AggregateFactory
+public sealed class AggregateFactory
 {
-    public T Create<T>(IList<IDomainEvent> domainEvents)
+    public static T Create<T>(IEnumerable<IDomainEvent> domainEvents)
         where T: AggregateBase
     {
         var ctor = typeof(T).GetConstructor([typeof(IList<IDomainEvent>)]);

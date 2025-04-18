@@ -25,7 +25,7 @@ public sealed class GameAggregate : AggregateBase
         ApplyDomainEvent(@event);
     }
 
-    public CreatePlayersResult CreatePlayers(IEnumerable<string> playerNames)
+    public AddPlayersResult AddPlayers(IEnumerable<string> playerNames)
     {
         if (!playerNames.Any())
         {
@@ -33,14 +33,14 @@ public sealed class GameAggregate : AggregateBase
         }
 
         var players = playerNames.Select((name, index) => Player.Create(Guid.NewGuid(), index + 1, name)).ToList();
-        ApplyDomainEvent(new PlayersCreatedEvent(Id, players));
+        ApplyDomainEvent(new PlayersAddedEvent(Id, players));
 
         ApplyDomainEvent(new NewRoundStartedEvent(Id, _round));
 
         var nextPlayer = GetNewNextPlayer();
         ApplyDomainEvent(new NewPlayerTurnEvent(Id, nextPlayer.Id, _round));
 
-        return new CreatePlayersResult(nextPlayer.Id, nextPlayer.Order, nextPlayer.Name, _round);
+        return new AddPlayersResult(nextPlayer.Id, nextPlayer.Order, nextPlayer.Name, _round);
     }
 
     public void GuessMisteryNumber(Guid playerId, int guess)
@@ -91,7 +91,7 @@ public sealed class GameAggregate : AggregateBase
     protected override void RegisterDomainEventAppliers()
     {
         RegisterDomainEventApplier<GameCreatedEvent>(Apply);
-        RegisterDomainEventApplier<PlayersCreatedEvent>(Apply);
+        RegisterDomainEventApplier<PlayersAddedEvent>(Apply);
         RegisterDomainEventApplier<NewRoundStartedEvent>(Apply);
         RegisterDomainEventApplier<NewPlayerTurnEvent>(Apply);
         RegisterDomainEventApplier<GuessTooHighEvent>(Apply);
@@ -120,7 +120,7 @@ public sealed class GameAggregate : AggregateBase
         Save(@event);
     }
 
-    private void Apply(PlayersCreatedEvent @event)
+    private void Apply(PlayersAddedEvent @event)
     {
         _players = @event.Players;
         _maxOrder = _players.Max(p => p.Order);
@@ -168,4 +168,4 @@ public sealed class GameAggregate : AggregateBase
     }
 }
 
-public sealed record CreatePlayersResult(Guid NextPlayerId, int NextPlayerOrder, string NextPlayerNam, int CurrentRound);
+public sealed record AddPlayersResult(Guid NextPlayerId, int NextPlayerOrder, string NextPlayerNam, int CurrentRound);
