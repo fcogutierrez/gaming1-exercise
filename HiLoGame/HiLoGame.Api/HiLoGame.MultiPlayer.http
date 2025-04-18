@@ -1,4 +1,4 @@
-@host = http://localhost:32774
+@host = https://localhost:32769
 
 ### Create a new HiLo game
 # @name createGame
@@ -16,7 +16,7 @@ Content-Type: application/json
 
 ### Add players
 # @name addPlayers
-POST {{host}}/games/hilo/{{createGame.response.body.$.id}}/players
+POST {{host}}/games/hilo/{{gameId}}/players
 Content-Type: application/json
 
 {
@@ -41,6 +41,6 @@ POST {{host}}/games/hilo/{{{{gameId}}}}/players/{{{{playerTwoId}}}}/guess
 Content-Type: application/json
 
 {
-  "guess": 57
+  "guess": 80
 }
 ###
