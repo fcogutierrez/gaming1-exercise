@@ -4,4 +4,4 @@ namespace Application.Commands;
 
 public sealed record CreateGameCommand(int Min, int Max) : ICommand;
 
-public sealed record CreateGameCommandResult() : ICommandResult;
+public sealed record CreateGameCommandResult(Guid Id);

@@ -16,6 +16,6 @@ public sealed class CreateGameCommandHandler (IEventStorage eventStorage, IRando
         var game = new GameAggregate(command.Min, command.Max, _randomProvider);
         await _eventStorage.SaveMany(game.Changes);
 
-        return new CreateGameCommandResult();
+        return new CreateGameCommandResult(game.Id);
     }
 }

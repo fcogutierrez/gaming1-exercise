@@ -201,7 +201,7 @@ public sealed record InitialTurnResult(PlayerTurn PlayerTurn, int CurrentRound);
 
 public sealed record NextTurnResult(PlayerTurn PlayerTurn, int CurrentRound, FailedGuessHint PreviousPlayerGuessStatus);
 
-public sealed record MisteryNumberGuessedResult(WinnerPlayer PlayerTurn, int Value);
+public sealed record MisteryNumberGuessedResult(WinnerPlayer Winner, int Value);
 
 public record PlayerTurn(Guid Id, int Order, string Name);
 
