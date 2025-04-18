@@ -113,6 +113,19 @@ namespace Domain.Tests.Model
         }
 
         [Fact]
+        public void Guess_mistery_number_throws_an_exception_when_game_is_already_finished()
+        {
+            // Arrange
+            var game = new GameAggregate(1, 100, Mock.Of<IRandomProvider>());
+            var playerNames = new[] { "Player1", "Player2" };
+            var addPlayersResult = game.AddPlayers(playerNames);
+            game.GuessMisteryNumber(addPlayersResult.PlayerTurn.Id, MisteryNumber);
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => game.GuessMisteryNumber(addPlayersResult.PlayerTurn.Id, 50));
+        }
+
+        [Fact]
         public void Guess_mistery_number_throws_an_exception_when_player_is_not_found()
         {
             // Arrange
@@ -265,7 +278,7 @@ namespace Domain.Tests.Model
             firstGuessResult.TryPickT0(out NextTurnResult fourthTurn, out _);
 
             // Act
-            var fourthGuessResult = game.GuessMisteryNumber(fourthTurn.PlayerTurn.Id, 58);
+            var fourthGuessResult = game.GuessMisteryNumber(fourthTurn.PlayerTurn.Id, MisteryNumber);
 
             // Assert
             fourthGuessResult.TryPickT1(out MisteryNumberGuessedResult numberGuessed, out _);
@@ -273,7 +286,7 @@ namespace Domain.Tests.Model
             var playerOneId = GetPlayerId(game, index: 0);
             var playerTwoId = GetPlayerId(game, index: 1);
 
-            numberGuessed.Value.ShouldBe(58);
+            numberGuessed.Value.ShouldBe(MisteryNumber);
             numberGuessed.Winner.Id.ShouldBe(playerTwoId);
             numberGuessed.Winner.Name.ShouldBe("Player2");
             numberGuessed.Winner.Order.ShouldBe(2);
@@ -281,7 +294,7 @@ namespace Domain.Tests.Model
             var guessCorrectEvent = game.Changes.ElementAt(11).ShouldBeOfType<GuessCorrectEvent>();
             guessCorrectEvent.AggregateId.ShouldBe(game.Id);
             guessCorrectEvent.PlayerId.ShouldBe(playerTwoId);
-            guessCorrectEvent.GuessAttempt.Guess.ShouldBe(58);
+            guessCorrectEvent.GuessAttempt.Guess.ShouldBe(MisteryNumber);
             guessCorrectEvent.GuessAttempt.Status.ShouldBe(PlayerGuessStatus.Correct);
         }
 
