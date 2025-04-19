@@ -121,7 +121,7 @@ namespace Domain.Tests.Model
         public void Guess_mistery_number_throws_an_exception_when_game_is_already_finished()
         {
             // Arrange
-            var game = new GameAggregate(1, 100, Mock.Of<IRandomProvider>());
+            var game = new GameAggregate(1, 100, _randomProviderMock.Object);
             var playerNames = new[] { "Player1", "Player2" };
             var addPlayersResult = game.AddPlayers(playerNames);
             game.GuessMisteryNumber(addPlayersResult.PlayerTurn.Id, MisteryNumber);
