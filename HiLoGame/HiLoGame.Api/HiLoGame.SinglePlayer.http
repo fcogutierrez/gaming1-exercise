@@ -27,7 +27,7 @@ Content-Type: application/json
 @playerOneId = {{addPlayers.response.body.$.players[0].id}}
 
 ### Guess number.
-### Feel free to change the guess value.
+### Feel free to change the guess value and repeat this request.
 POST {{host}}/games/hilo/{{gameId}}/players/{{playerOneId}}/guess
 Content-Type: application/json
 
