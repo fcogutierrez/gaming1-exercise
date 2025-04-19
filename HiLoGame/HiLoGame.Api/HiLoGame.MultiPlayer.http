@@ -1,6 +1,7 @@
 @host = https://localhost:32769
 
-### Create a new HiLo game
+### Create a new HiLo game.
+### Feel free to change the min and max values to test the game with different ranges.
 # @name createGame
 POST {{host}}/games/hilo/
 Content-Type: application/json
@@ -10,11 +11,10 @@ Content-Type: application/json
   "max": 100
 }
 
-###
-
+### Assign the game ID to a variable for later use.
 @gameId = {{createGame.response.body.$.id}}
 
-### Add players
+### Add multiple players.
 # @name addPlayers
 POST {{host}}/games/hilo/{{gameId}}/players
 Content-Type: application/json
@@ -22,12 +22,13 @@ Content-Type: application/json
 {
   "playerNames": ["Steve Jobs", "Bill Gates"]
 }
-###
 
+### Assign the player IDs to variables for later use.
 @playerOneId = {{addPlayers.response.body.$.players[0].id}}
 @playerTwoId = {{addPlayers.response.body.$.players[1].id}}
 
-### Guess from Steve Jobs (Player 1)
+### Guess from Steve Jobs (Player 1).
+### Feel free to change the guess value and repeat this request (respecting the order).
 POST {{host}}/games/hilo/{{{{gameId}}}}/players/{{{{playerOneId}}}}/guess
 Content-Type: application/json
 
@@ -36,7 +37,8 @@ Content-Type: application/json
 }
 ###
 
-### Guess from Bill Gates (Player 2)
+### Guess from Bill Gates (Player 2).
+### Feel free to change the guess value and repeat this request (respecting the order).
 POST {{host}}/games/hilo/{{{{gameId}}}}/players/{{{{playerTwoId}}}}/guess
 Content-Type: application/json
 

@@ -1,6 +1,7 @@
 @host = https://localhost:32769
 
-### Create a new HiLo game
+### Create a new HiLo game.
+### Feel free to change the min and max values to test the game with different ranges.
 # @name createGame
 POST {{host}}/games/hilo/
 Content-Type: application/json
@@ -10,11 +11,10 @@ Content-Type: application/json
   "max": 100
 }
 
-###
-
+### Assign the game ID to a variable for later use.
 @gameId = {{createGame.response.body.$.id}}
 
-### Add players
+### Add a single player.
 # @name addPlayers
 POST {{host}}/games/hilo/{{gameId}}/players
 Content-Type: application/json
@@ -26,7 +26,8 @@ Content-Type: application/json
 
 @playerOneId = {{addPlayers.response.body.$.players[0].id}}
 
-### Guess number
+### Guess number.
+### Feel free to change the guess value.
 POST {{host}}/games/hilo/{{gameId}}/players/{{playerOneId}}/guess
 Content-Type: application/json
 
